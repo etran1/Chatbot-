@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .chatbox {
+      width: 300px;
+      height: 300px;
+      border: 1px solid black;
+      margin: 10px auto;
+      padding: 10px;
+    }
+
+    .chatbox .messages {
+      height: 200px;
+      overflow: auto;
+    }
+
+    .chatbox .input {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="chatbox">
+    <div class="messages chat-history">
+      <p>Hi, I'm Eric. How can I help you today?</p>
+    </div>
+    <div class="input">
+      <input type="text" id="input" />
+      <button type="button" id="send">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatbot = {
+      knowledgeBase: {
+        "What is your name?": "My name is Eric.",
+        "What can you do?": "I can answer your questions, generate text, translate languages, and write different kinds of creative content.",
+        "What is the weather like today?": "The weather is sunny and 72 degrees Fahrenheit today.",
+        "What is the capital of France?": "The capital of France is Paris.",
+        "How do I get to the train station?": "The train station is located at 123 Main Street.",
+        "What is the time?": "It is currently 10:00 AM.",
+        "What is the date?": "Today is March 8, 2023.",
+        "What is the weather like tomorrow?": "The weather is expected to be cloudy and 60 degrees Fahrenheit tomorrow.",
+      },
+
+      sendMessage: function() {
+        const input = document.getElementById("input").value;
+        let response = this.knowledgeBase[input];
+
+        if (!response) {
+          fetch(`https://api.duckduckgo.com/?q=${input}`)
+            .then((apiResponse) => apiResponse.json())
+            .then((json) => {
+              const searchResponse = json.Results && json.Results[0] && json.Results[0].Text
+                ? json.Results[0].Text
+                : "I'm sorry, I don't have an answer for that at the moment.";
+              const messages = document.querySelector(".chatbox .messages");
+              const message = document.createElement("p");
+              message.textContent = searchResponse;
+              messages.appendChild(message);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              const searchResponse = "I'm sorry, there was an error retrieving the information.";
+              const messages = document.querySelector(".chatbox .messages");
+              const message = document.createElement("p");
+              message.textContent = searchResponse;
+              messages.appendChild(message);
+            });
+        } else {
+          const messages = document.querySelector(".chatbox .messages");
+          const message = document.createElement("p");
+          message.textContent = response;
+          messages.appendChild(message);
+        }
+
+        const chatHistory = document.querySelector(".chatbox .chat-history");
+        const chatMessage = document.createElement("p");
+        chatMessage.textContent = input;
+        chatHistory.appendChild(chatMessage);
+
+        document.getElementById("input").value = "";
+      },
+    };
+
+    document.getElementById("send").addEventListener("click", chatbot.sendMessage);
+  </script>
+</body>
+</html>
